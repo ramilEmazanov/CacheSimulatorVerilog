@@ -46,31 +46,11 @@ typedef enum logic [2:0] {
 } state_memctr;
 
 typedef enum logic [1:0] {
-    C2_NOP      = 2'b00,
-    C2_READ     = 2'b01,
-    C2_WRITE    = 2'b10,
-    C2_RESPONSE = 2'b11
+  C2_NOP,
+  C2_READ,
+  C2_WRITE,
+  C2_RESPONSE
 } c2_commands;
-
-typedef enum logic [4:0] {
-  READ_ADDR1,
-  READ_ADDR2,
-  CHECK_CACHE,
-  HIT_READ_1,
-  HIT_READ_2,
-  HIT_READ_RESPONSE,
-  HIT_WRITE_1,
-  HIT_WRITE_2,
-  HIT_WRITE_RESPONSE,
-  MISS_READ_GET_VICTIM,
-  MISS_SEND_ADDR,
-  MISS_GET_DATA,
-  WRITE_DIRTY,
-  WRITE_DIRTY_DATA,
-  WAIT_WRITE_RESPONSE,
-  INVALIDATE_STATE,
-  PROCESS_COMMAND
-} state_cache;
 
 typedef enum logic [`CTR1_BUS_LEN - 1 : 0] {
   C1_NOP,
@@ -83,6 +63,5 @@ typedef enum logic [`CTR1_BUS_LEN - 1 : 0] {
   C1_WRITE_32,
   C1_RESPONSE
 } c1_commands;
-
 
 `endif
