@@ -193,6 +193,9 @@ always @(posedge clk, posedge reset) begin
       end
 
       HIT_READ_1 : begin
+        logic all_ones;
+        all_ones = 1;
+
         D1_writing_out <= 1;
         C1_writing_out <= 1;
 
@@ -220,9 +223,24 @@ always @(posedge clk, posedge reset) begin
           state <= IDLE;
         end
         endcase
-        
+
         if(IS_PLRU) begin
           bit_plru[set_index][hit_line_index] <= 1;
+
+          for(int i = 0; i < `CACHE_WAY; ++i) begin
+            if(bit_plru[set_index][i] == 0 && i != hit_line_index) begin
+              all_ones = 0;
+            end
+          end
+
+          if (all_ones) begin
+            for(int i = 0; i < `CACHE_WAY; ++i) begin
+              if(i != hit_line_index) begin
+                bit_plru[set_index][i] <= 0;
+              end
+            end  
+          end
+
         end else begin
 
           lru_age[set_index][hit_line_index] <= 0;
@@ -250,6 +268,10 @@ always @(posedge clk, posedge reset) begin
       end
 
       HIT_WRITE_1 : begin
+
+        logic all_ones;
+        all_ones = 1;
+
         D1_writing_out <= 0;
         C1_writing_out <= 1;
 
@@ -278,13 +300,28 @@ always @(posedge clk, posedge reset) begin
 
         if(IS_PLRU) begin
           bit_plru[set_index][hit_line_index] <= 1;
+
+          for(int i = 0; i < `CACHE_WAY; ++i) begin
+            if(bit_plru[set_index][i] == 0 && i != hit_line_index) begin
+              all_ones = 0;
+            end
+          end
+
+          if(all_ones) begin
+            for(int i = 0; i < `CACHE_WAY; ++i) begin
+              if(i != hit_line_index) begin
+                bit_plru[set_index][i] <= 0;
+              end
+            end  
+          end
+
         end else begin
           lru_age[set_index][hit_line_index] <= 0;
           
           for(int i = 0; i < `CACHE_WAY; ++i) begin
             if(i != hit_line_index && cache_valid[set_index][i]) begin
               if(lru_age[set_index][hit_line_index] > lru_age[set_index][i]) begin
-              lru_age[set_index][i] <= lru_age[set_index][i] + 1;
+                lru_age[set_index][i] <= lru_age[set_index][i] + 1;
               end
             end
           end
@@ -305,22 +342,37 @@ always @(posedge clk, posedge reset) begin
 
       MISS_READ_GET_VICTIM : begin
         int found_invalid;
+        int found_bplru_victim;
         int victim;
         
         victim = 0;
+        found_bplru_victim = 0;
         found_invalid = 0;
 
         for(int i = 0; i < `CACHE_WAY; ++i) begin
           if(cache_valid[set_index][i] == 0 && found_invalid == 0) begin
             victim = i;
             found_invalid = 1;
-          end 
-
-          if(lru_age[set_index][i] > lru_age[set_index][victim] && found_invalid == 0) begin
-            victim = i;
           end
         end
 
+        if(IS_PLRU) begin
+          if (found_invalid == 0) begin
+            for(int i = 0; i < `CACHE_WAY; ++i) begin
+              if(bit_plru[set_index][i] == 0 && found_bplru_victim == 0) begin
+                victim = i;
+                found_bplru_victim = 1;
+              end
+            end
+          end
+        end else begin
+          for(int i = 0; i < `CACHE_WAY; ++i) begin
+            if(lru_age[set_index][i] > lru_age[set_index][victim] && found_invalid == 0) begin
+              victim = i;
+            end
+          end
+        end
+    
         victim_index <= victim;
 
         if(cache_valid[set_index][victim] && cache_dirty[set_index][victim] == 1) begin
