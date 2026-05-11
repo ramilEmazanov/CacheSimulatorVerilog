@@ -17,7 +17,7 @@ module cache #(parameter IS_PLRU = 0)(
 );
 
 typedef enum logic [4:0] {
-  IDLE,
+  START,
   READ_ADDR1,
   READ_ADDR2,
   CHECK_CACHE,
@@ -89,7 +89,7 @@ reg [4:0] cnt = 0;
 always @(posedge clk, posedge reset) begin
 
   if (reset) begin
-    state <= IDLE;
+    state <= START;
     current_cmd <= C1_NOP;
 
     C1_writing_out <= 0;
@@ -122,7 +122,7 @@ always @(posedge clk, posedge reset) begin
     end
   end else begin
     case (state)
-      IDLE : begin
+      START : begin
         C1_writing_out <= 0;
         D1_writing_out <= 0;
         C2_writing_out <= 0;
@@ -189,7 +189,7 @@ always @(posedge clk, posedge reset) begin
           end
         end
 
-        state <= IDLE;
+        state <= START;
       end
 
       HIT_READ_1 : begin
@@ -219,9 +219,6 @@ always @(posedge clk, posedge reset) begin
           state <= HIT_READ_2;
         end
 
-        default : begin
-          state <= IDLE;
-        end
         endcase
 
         if(IS_PLRU) begin
@@ -262,7 +259,7 @@ always @(posedge clk, posedge reset) begin
       end
 
       HIT_READ_RESPONSE : begin
-        state <= IDLE;
+        state <= START;
         D1_writing_out <= 0;
         C1_writing_out <= 0;
       end
@@ -336,7 +333,7 @@ always @(posedge clk, posedge reset) begin
       end
 
       HIT_WRITE_RESPONSE : begin
-        state <= IDLE;
+        state <= START;
         C1_writing_out <= 0;
       end
 
@@ -455,7 +452,7 @@ always @(posedge clk, posedge reset) begin
       end
 
       default : begin
-        state <= IDLE;
+        state <= START;
         C1_writing_out <= 0;
         D1_writing_out <= 0;
         C2_writing_out <= 0;

@@ -40,14 +40,14 @@ always @(posedge clk, posedge reset) begin
     D2_writing_out <= 0;
     C2_out <= C2_NOP;
     D2_out <= 0;
-    state <= IDLE;
+    state <= START;
     cnt <= 0;
     addr2 <= '0;
     data <= '0;
 
   end else begin
     case (state)
-      IDLE : begin
+      START : begin
         C2_writing_out <= 0;
         D2_writing_out <= 0;
         C2_out <= C2_NOP;
@@ -63,14 +63,11 @@ always @(posedge clk, posedge reset) begin
             addr2 <= A2;
           end
 
-          C2_RESPONSE : begin
-          end
-
           C2_NOP : begin
           end
 
           default: begin
-            state <= IDLE;
+            state <= START;
           end
         endcase
       end
@@ -96,7 +93,7 @@ always @(posedge clk, posedge reset) begin
         C2_writing_out <= 1;
         C2_out <= C2_RESPONSE;
         D2_writing_out <= 0;
-        state <= IDLE;
+        state <= START;
       end
 
       READ_RESPONSE : begin
@@ -114,12 +111,12 @@ always @(posedge clk, posedge reset) begin
           D2_writing_out <= 0;
           C2_writing_out <= 0;
 
-          state <= IDLE;
+          state <= START;
         end
       end
 
       default: begin
-        state <= IDLE;
+        state <= START;
         C2_writing_out <= 0;
         D2_writing_out <= 0;
       end

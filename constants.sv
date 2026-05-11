@@ -38,7 +38,7 @@
 `define LRU_AGE_LEN 2
 
 typedef enum logic [2:0] {
-  IDLE,
+  START,
   READ_MEMORY,
   READ_RESPONSE,
   WRITE_DATA,
